@@ -8,6 +8,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <common/texture.hpp>
 
 void window_size_callback(GLFWwindow *window, int width, int height);
@@ -53,14 +54,9 @@ int main()
 
     //初始化各种数据
     bool ImGui = true;
-    bool the_same_color = false;
-    bool draw_trangle_without_render = false;
-    bool draw_trangle = false;
-    bool bonus_draw_line = false;
-    bool bonus_draw_another_trangle = false;
-    unsigned int VBO, VAO, EBO;
     bool show_demo_window = true;
     int isOrthoCamera = 0;
+    float radius = 3.0f;
 
     // 开启深度测试
     glEnable(GL_DEPTH_TEST);
@@ -77,7 +73,8 @@ int main()
     ImVec4 v1 = ImVec4(-0.25f, -0.25f, 0.0f, 1.00f);
     ImVec4 v2 = ImVec4(0.25f, -0.25f, 0.0f, 1.00f);
     ImVec4 v3 = ImVec4(0.0f, 0.25f, 0.0f, 1.00f);
-    ImVec4 camPos = ImVec4(4.0f, 3.0f, 3.0f, 1.00f);
+    // ImVec4 camPos = ImVec4(4.0f, 3.0f, 3.0f, 1.00f);
+    ImVec4 camPos = ImVec4(radius, 0.0f, radius, 1.00f);
 
     float viewField = 90.0f;
     //定义顶点缓冲，并将顶点缓冲传给OpenGL
@@ -177,37 +174,41 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_uv_buffer_data), g_uv_buffer_data, GL_STATIC_DRAW);
 
+
+    glm::mat4 RotationMatrix45 = glm::rotate((float)3.14f/4, glm::vec3(1, 0, 0));
+
     // 渲染循环
     while (!glfwWindowShouldClose(window))
     {
+        double currentTime = glfwGetTime();
+
 
         // Projection matrix : 45?Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
         glm::mat4 Projection = isOrthoCamera ? glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 10.0f) : glm::perspective(glm::radians(viewField), 4.0f / 3.0f, 0.1f, 100.0f);
 
+        glm::vec3 pos = glm::vec3(radius, 0, radius); // Camera is at (4,3,3), in World Space
+        glm::vec3 lookAtPos = glm::vec3(0, 0, 0);
+        glm::vec3 up = glm::vec3(0, 1, 0);
+
+        glm::vec3 rotationAxis = glm::vec3(0, 1, 0);
+        glm::mat4 RotationMatrix = glm::rotate((float)currentTime, rotationAxis);
+
         // Camera matrix
-        glm::mat4 View = glm::lookAt(
-            glm::vec3(camPos.x, camPos.y, camPos.z), // Camera is at (4,3,3), in World Space
-            glm::vec3(0, 0, 0),                      // and looks at the origin
-            glm::vec3(0, 1, 0)                       // Head is up (set to 0,-1,0 to look upside-down)
-        );
-        // Model matrix : an identity matrix (model will be at the origin)
+        glm::mat4 View = glm::lookAt(pos, lookAtPos, up);
+        View = View * RotationMatrix * RotationMatrix45;
         glm::mat4 Model = glm::mat4(1.0f);
-        // Our ModelViewProjection : multiplication of our 3 matrices
-        glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
+        glm::mat4 MVP = Projection * View  * Model; 
 
         // 创建ImGui
         glfwPollEvents();
         ImGui_ImplGlfwGL3_NewFrame();
-        ImGui::Begin("change vertex", &ImGui, ImGuiWindowFlags_MenuBar);
+        ImGui::Begin("Panel", &ImGui, ImGuiWindowFlags_MenuBar);
         ImGui::RadioButton("perspective camera", &isOrthoCamera, 0);
         ImGui::SameLine();
         ImGui::RadioButton("ortho camera", &isOrthoCamera, 1);
 
-        ImGui::SliderFloat("v3.y", &v3.y, -1.0f, 1.0f, "v3.y = %.3f");
         ImGui::SliderFloat("viewField", &viewField, 0.0f, 90.0f, "viewField = %.3f");
-        ImGui::SliderFloat("x", &camPos.x, -15.0f, 15.0f, "camPos.x = %.3f");
-        ImGui::SliderFloat("y", &camPos.y, -15.0f, 15.0f, "camPos.y = %.3f");
-        ImGui::SliderFloat("z", &camPos.z, -15.0f, 15.0f, "camPos.z = %.3f");
+        ImGui::SliderFloat("radius", &radius, 0.0f, 20.0f, "radius = %.3f");
 
         ImGui::End();
 
