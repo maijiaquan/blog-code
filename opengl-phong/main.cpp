@@ -27,6 +27,7 @@ float verticalAngle = 0.0f;
 // Initial Field of View
 float initialFoV = 45.0f;
 
+float ambientStrength = 0.3;
 float shininess = 2;
 float specularStrength = 0.5;
 
@@ -281,6 +282,8 @@ int main()
         ImGui::SliderFloat("verticalAngle", &verticalAngle, -10.0f, 10.0f, "verticalAngle = %.3f");
         
         ImGui::Separator();
+        
+        ImGui::SliderFloat("ambientStrength", &ambientStrength, 0.0f, 1.0f, "ambientStrength = %.3f");
         ImGui::SliderFloat("shininess", &shininess, 0.0f, 256.0f, "shininess = %.3f");
         ImGui::SliderFloat("specularStrength", &specularStrength, 0.0f, 1.0f, "specularStrength = %.3f");
         ImGui::ColorEdit3("cube color", (float *)&cubeColor);
@@ -312,6 +315,7 @@ int main()
         setVec3(cubeProgramID, "lightPos", lightPos.x, lightPos.y, lightPos.z);
         setVec3(cubeProgramID, "viewPos", position.x, position.y, position.z);
         setFloat(cubeProgramID, "shininess", shininess);
+        setFloat(cubeProgramID, "ambientStrength", ambientStrength);
         setFloat(cubeProgramID, "specularStrength", specularStrength);
         
 
