@@ -27,6 +27,10 @@ float verticalAngle = 0.0f;
 // Initial Field of View
 float initialFoV = 45.0f;
 
+float shininess = 2;
+float specularStrength = 0.5;
+
+
 float speed = 3.0f; // 3 units / second
 float mouseSpeed = 0.005f;
 
@@ -194,7 +198,7 @@ int main()
     bool show_demo_window = true;
     int isOrthoCamera = 0;
     float radius = 3.0f;
-    float viewField = 90.0f;
+    float viewField = 45.0f;
     ImVec4 camPos = ImVec4(radius, 0.0f, radius, 1.00f);
     glm::vec3 lightPos(1.2f, 0.8f, 2.0f);
     ImVec4 cubeColor = ImVec4(1.0f, 0.5f, 0.31f, 1.00f);
@@ -275,6 +279,10 @@ int main()
         ImGui::SliderFloat("radius", &radius, 0.0f, 20.0f, "radius = %.3f");
         ImGui::SliderFloat("horizontalAngle", &horizontalAngle, -10.0f, 10.0f, "horizontalAngle = %.3f");
         ImGui::SliderFloat("verticalAngle", &verticalAngle, -10.0f, 10.0f, "verticalAngle = %.3f");
+        
+        ImGui::Separator();
+        ImGui::SliderFloat("shininess", &shininess, 0.0f, 256.0f, "shininess = %.3f");
+        ImGui::SliderFloat("specularStrength", &specularStrength, 0.0f, 1.0f, "specularStrength = %.3f");
         ImGui::ColorEdit3("cube color", (float *)&cubeColor);
         ImGui::ColorEdit3("light color", (float *)&lightColor);
 
@@ -303,6 +311,11 @@ int main()
         setVec3(cubeProgramID, "lightColor", lightColor.x, lightColor.y, lightColor.z);
         setVec3(cubeProgramID, "lightPos", lightPos.x, lightPos.y, lightPos.z);
         setVec3(cubeProgramID, "viewPos", position.x, position.y, position.z);
+        setFloat(cubeProgramID, "shininess", shininess);
+        setFloat(cubeProgramID, "specularStrength", specularStrength);
+        
+
+
         setMat4(cubeProgramID, "projection", Projection);
         setMat4(cubeProgramID, "view", View);
         setMat4(cubeProgramID, "model", Model);
